@@ -9,13 +9,18 @@ import {
 } from '../util/index'
 import { updateListeners } from '../vdom/helpers/index'
 
+/**
+ * 初始化事件需要的属性；
+ * 如果有父级的监听事件，继承之
+ * @param {*} vm 
+ */
 export function initEvents (vm: Component) {
   vm._events = Object.create(null)
   vm._hasHookEvent = false
   // init parent attached events
   const listeners = vm.$options._parentListeners
   if (listeners) {
-    updateComponentListeners(vm, listeners)
+    updateComponentListeners(vm, listeners)//继承父组件的监听事件
   }
 }
 
@@ -45,6 +50,8 @@ export function updateComponentListeners (
 
 export function eventsMixin (Vue: Class<Component>) {
   const hookRE = /^hook:/
+
+  //特别注意：绑定事件类型可以是个数组
   Vue.prototype.$on = function (event: string | Array<string>, fn: Function): Component {
     const vm: Component = this
     if (Array.isArray(event)) {
@@ -64,6 +71,7 @@ export function eventsMixin (Vue: Class<Component>) {
 
   Vue.prototype.$once = function (event: string, fn: Function): Component {
     const vm: Component = this
+    //仅执行一次，移除监听后再执行回调
     function on () {
       vm.$off(event, on)
       fn.apply(vm, arguments)
@@ -104,7 +112,7 @@ export function eventsMixin (Vue: Class<Component>) {
         cb = cbs[i]
         if (cb === fn || cb.fn === fn) {
           cbs.splice(i, 1)
-          break
+          break//疑问：如何解决回调重复注册?
         }
       }
     }

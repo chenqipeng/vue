@@ -4,6 +4,10 @@ import { warn } from '../util/index'
 import { hasSymbol } from 'core/util/env'
 import { defineReactive, observerState } from '../observer/index'
 
+/**
+ * https://cn.vuejs.org/v2/api/#provide-inject
+ * @param {*} vm 
+ */
 export function initProvide (vm: Component) {
   const provide = vm.$options.provide
   if (provide) {
@@ -13,6 +17,10 @@ export function initProvide (vm: Component) {
   }
 }
 
+/**
+ * https://cn.vuejs.org/v2/api/#provide-inject
+ * @param {*} vm 
+ */
 export function initInjections (vm: Component) {
   const result = resolveInject(vm.$options.inject, vm)
   if (result) {
@@ -35,6 +43,7 @@ export function initInjections (vm: Component) {
     observerState.shouldConvert = true
   }
 }
+
 
 export function resolveInject (inject: any, vm: Component): ?Object {
   if (inject) {

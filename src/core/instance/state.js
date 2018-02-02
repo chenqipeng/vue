@@ -45,6 +45,11 @@ export function proxy (target: Object, sourceKey: string, key: string) {
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
+/**
+ * 初始化Vue组件的属性与方法等，顺序：
+ * props，methods，data，computed，watch
+ * @param {*} vm 
+ */
 export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options
@@ -325,12 +330,13 @@ export function stateMixin (Vue: Class<Component>) {
       warn(`$props is readonly.`, this)
     }
   }
-  Object.defineProperty(Vue.prototype, '$data', dataDef)
-  Object.defineProperty(Vue.prototype, '$props', propsDef)
+  Object.defineProperty(Vue.prototype, '$data', dataDef)//Vue实例的$data属性！
+  Object.defineProperty(Vue.prototype, '$props', propsDef)//Vue实例的$props属性！
 
-  Vue.prototype.$set = set
-  Vue.prototype.$delete = del
+  Vue.prototype.$set = set//Vue实例的$set函数！
+  Vue.prototype.$delete = del//Vue实例的$delete函数！
 
+  //Vue实例的$watch函数！
   Vue.prototype.$watch = function (
     expOrFn: string | Function,
     cb: any,
@@ -343,7 +349,7 @@ export function stateMixin (Vue: Class<Component>) {
     options = options || {}
     options.user = true
     const watcher = new Watcher(vm, expOrFn, cb, options)
-    if (options.immediate) {
+    if (options.immediate) {//immediate值设置为true，则watch回调将被立即调用
       cb.call(vm, watcher.value)
     }
     return function unwatchFn () {

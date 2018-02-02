@@ -37,7 +37,7 @@ export class Observer {
   dep: Dep;
   vmCount: number; // number of vms that has this object as root $data
 
-  constructor (value: any) {
+   constructor (value: any) {
     this.value = value
     this.dep = new Dep()
     this.vmCount = 0
@@ -128,6 +128,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
 
 /**
  * Define a reactive property on an Object.
+ * 注册响应属性
  */
 export function defineReactive (
   obj: Object,
@@ -246,6 +247,8 @@ export function del (target: Array<any> | Object, key: any) {
 /**
  * Collect dependencies on array elements when the array is touched, since
  * we cannot intercept array element access like property getters.
+ * 
+ * 数组的监听：循环每项，设置监听；如果数组项仍是数组，则递归调用此方式设置
  */
 function dependArray (value: Array<any>) {
   for (let e, i = 0, l = value.length; i < l; i++) {

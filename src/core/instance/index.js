@@ -14,10 +14,11 @@ function Vue (options) {
   this._init(options)
 }
 
+//初始化Vue实例的属性与函数
 initMixin(Vue)
-stateMixin(Vue)
-eventsMixin(Vue)
-lifecycleMixin(Vue)
-renderMixin(Vue)
+stateMixin(Vue)//混入$data属性，$props属性，$set函数，$delete函数，$watch函数
+eventsMixin(Vue)//混入$on函数，$once函数，$off函数，$emit函数
+lifecycleMixin(Vue)//混入$forceUpdate函数，$destroy函数
+renderMixin(Vue)//混入$nextTick函数，
 
 export default Vue
