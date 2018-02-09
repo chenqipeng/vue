@@ -14,6 +14,9 @@ import {
   isServerRendering
 } from '../util/index'
 
+/**
+ * ['push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse']
+ */
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 
 /**
@@ -43,12 +46,14 @@ export class Observer {
     this.vmCount = 0
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
+      //如果是数组，则递归地新建Observer直到观察对象是对象
       const augment = hasProto
         ? protoAugment
         : copyAugment
       augment(value, arrayMethods, arrayKeys)
       this.observeArray(value)
     } else {
+      //观察目标是对象类型，则利用Object.defineProperty拦截对象属性的获取与修改
       this.walk(value)
     }
   }
@@ -67,6 +72,7 @@ export class Observer {
 
   /**
    * Observe a list of Array items.
+   * 观察数组项，如果数组项还是数组，则递归执行
    */
   observeArray (items: Array<any>) {
     for (let i = 0, l = items.length; i < l; i++) {
@@ -128,7 +134,8 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
 
 /**
  * Define a reactive property on an Object.
- * 注册响应属性
+ * 注册响应属性，使用Object.defineProperty拦截对象每个属性的获取和修改，
+ * 当修改属性值时，通知相应的watcher进行视图的更新等
  */
 export function defineReactive (
   obj: Object,
@@ -181,6 +188,7 @@ export function defineReactive (
         val = newVal
       }
       childOb = !shallow && observe(newVal)
+      //通知更新，Vue的响应式核心所在
       dep.notify()
     }
   })

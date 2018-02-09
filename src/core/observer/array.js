@@ -6,6 +6,12 @@
 import { def } from '../util/index'
 
 const arrayProto = Array.prototype
+
+/**
+ * 一个对象，包含几个Vue可以监听变化的数组方法：
+ * push，pop，shift，unshift，splice，sort，reverse；
+ * 执行数组的这些方法时，Vue会响应式地更新视图
+ */
 export const arrayMethods = Object.create(arrayProto)
 
 /**
@@ -36,6 +42,7 @@ export const arrayMethods = Object.create(arrayProto)
         inserted = args.slice(2)
         break
     }
+    //观察新加入的数组项
     if (inserted) ob.observeArray(inserted)
     // notify change
     ob.dep.notify()

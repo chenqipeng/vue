@@ -47,7 +47,13 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 
 /**
  * 初始化Vue组件的属性与方法等，顺序：
- * props，methods，data，computed，watch
+ * props，methods，data，computed，watch；
+ * 
+ * Vue的响应式原理核心在这个函数里，data属性的响应式注册在这个函数执行。
+ * 
+ * 通过Object.defineProperty设置data每个属性的setter，
+ * 可以在数据发生变化时，Vue截取到变化的发生，
+ * 从而通知相应的watcher进行相应的视图更新
  * @param {*} vm 
  */
 export function initState (vm: Component) {
@@ -114,6 +120,7 @@ function initProps (vm: Component, propsOptions: Object) {
 
 function initData (vm: Component) {
   let data = vm.$options.data
+  //data可以是一个对象，或一个返回对象的函数
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
     : data || {}
