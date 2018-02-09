@@ -182,6 +182,8 @@ export function defineReactive (
       if (process.env.NODE_ENV !== 'production' && customSetter) {
         customSetter()
       }
+      //这里说明了：Vue不能检测到对象属性的添加或删除
+      //当一个属性是动态地添加到data中时，Vue不会为其添加观察者进行监听
       if (setter) {
         setter.call(obj, newVal)
       } else {
