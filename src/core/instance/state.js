@@ -124,6 +124,7 @@ function initData (vm: Component) {
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
     : data || {}
+  // data属性如果不是对象类型，则覆盖为一个空对象
   if (!isPlainObject(data)) {
     data = {}
     process.env.NODE_ENV !== 'production' && warn(
@@ -133,6 +134,7 @@ function initData (vm: Component) {
     )
   }
   // proxy data on instance
+  // 代理data中的属性到vue实例中
   const keys = Object.keys(data)
   const props = vm.$options.props
   const methods = vm.$options.methods
@@ -141,6 +143,7 @@ function initData (vm: Component) {
     const key = keys[i]
     if (process.env.NODE_ENV !== 'production') {
       if (methods && hasOwn(methods, key)) {
+        // 检查methods和data是否同名
         warn(
           `Method "${key}" has already been defined as a data property.`,
           vm
@@ -148,12 +151,15 @@ function initData (vm: Component) {
       }
     }
     if (props && hasOwn(props, key)) {
+      // 检查props和data是否同名
       process.env.NODE_ENV !== 'production' && warn(
         `The data property "${key}" is already declared as a prop. ` +
         `Use prop default value instead.`,
         vm
       )
     } else if (!isReserved(key)) {
+      // data里的属性代理到vm的_data中
+      // vm.key的get和set都是通过vm._date.key代理
       proxy(vm, `_data`, key)
     }
   }

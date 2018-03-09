@@ -44,9 +44,10 @@ export class Observer {
     this.value = value
     this.dep = new Dep()
     this.vmCount = 0
+    // 绑定此Observer到该属性
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
-      //如果是数组，则递归地新建Observer直到观察对象是对象
+      //如果是数组类型，则递归地新建Observer直到观察对象是对象类型
       const augment = hasProto
         ? protoAugment
         : copyAugment
@@ -109,6 +110,7 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
  * Attempt to create an observer instance for a value,
  * returns the new observer if successfully observed,
  * or the existing observer if the value already has one.
+ * 新建一个observer绑定到该属性，如果已经绑定了则直接返回
  */
 export function observe (value: any, asRootData: ?boolean): Observer | void {
   if (!isObject(value) || value instanceof VNode) {
@@ -116,11 +118,12 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
   }
   let ob: Observer | void
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
+    // 已经有observer了，直接返回
     ob = value.__ob__
   } else if (
     observerState.shouldConvert &&
     !isServerRendering() &&
-    (Array.isArray(value) || isPlainObject(value)) &&
+    (Array.isArray(value) /* 数组类型 */ || isPlainObject(value) /* 对象类型（纯对象） */) &&
     Object.isExtensible(value) &&
     !value._isVue
   ) {
@@ -184,9 +187,9 @@ export function defineReactive (
       }
       //这里说明了：Vue不能检测到对象属性的添加或删除
       //当一个属性是动态地添加到data中时，Vue不会为其添加观察者进行监听
-      if (setter) {
+      if (setter) { //设置了setter，说明这个属性在这个方法注册过，是响应式的，其值的变化是可以触发视图的更新的
         setter.call(obj, newVal)
-      } else {
+      } else { //没有setter，说明这个属性是直接动态加入的，无法响应式地更新视图
         val = newVal
       }
       childOb = !shallow && observe(newVal)
