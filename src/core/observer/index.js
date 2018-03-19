@@ -113,7 +113,7 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
  * 新建一个observer绑定到该属性，如果已经绑定了则直接返回
  */
 export function observe (value: any, asRootData: ?boolean): Observer | void {
-  if (!isObject(value) || value instanceof VNode) {
+  if (!isObject(value) /* 如果目标不是一个对象，则直接返回 */ || value instanceof VNode) {
     return
   }
   let ob: Observer | void
@@ -158,12 +158,12 @@ export function defineReactive (
   const getter = property && property.get
   const setter = property && property.set
 
-  let childOb = !shallow && observe(val)
+  let childOb = !shallow && observe(val) // 递归地注册属性的响应性，直到不是对象
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
     get: function reactiveGetter () {
-      const value = getter ? getter.call(obj) : val
+      const value = getter ? getter.call(obj) : val // 如果有getter则从getter中取，没有getter则从闭包中取val
       if (Dep.target) {
         dep.depend()
         if (childOb) {
@@ -175,24 +175,29 @@ export function defineReactive (
       }
       return value
     },
+
+    /**
+     * 监听响应式变化的代码包含在其中；
+     * 说明了：如果只有通过注册响应式属性的对象属性才会被响应式系统监听更新，
+     * 而用户自己动态直接添加的属性，不纳入响应式更新中
+     */
     set: function reactiveSetter (newVal) {
       const value = getter ? getter.call(obj) : val
       /* eslint-disable no-self-compare */
-      if (newVal === value || (newVal !== newVal && value !== value)) {
+      // 新值等于旧值时不予更新
+      if (newVal === value /* 全等 */ || (newVal !== newVal && value !== value) /* 新值和旧值都是NaN */) {
         return
       }
       /* eslint-enable no-self-compare */
       if (process.env.NODE_ENV !== 'production' && customSetter) {
         customSetter()
       }
-      //这里说明了：Vue不能检测到对象属性的添加或删除
-      //当一个属性是动态地添加到data中时，Vue不会为其添加观察者进行监听
-      if (setter) { //设置了setter，说明这个属性在这个方法注册过，是响应式的，其值的变化是可以触发视图的更新的
+      if (setter) { // 本来已经有setter，调用旧的setter
         setter.call(obj, newVal)
-      } else { //没有setter，说明这个属性是直接动态加入的，无法响应式地更新视图
+      } else { // 本来没有设置setter，把值赋给闭包中的val
         val = newVal
       }
-      childOb = !shallow && observe(newVal)
+      childOb = !shallow && observe(newVal) // 为新值（可能会是对象类型）注册响应式监听
       //通知更新，Vue的响应式核心所在
       dep.notify()
     }
