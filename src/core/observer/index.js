@@ -34,6 +34,7 @@ export const observerState = {
  * object. Once attached, the observer converts target
  * object's property keys into getter/setters that
  * collect dependencies and dispatches updates.
+ * 观察者类：为目标对象的每个字段设置getter/setter，用于收集依赖和响应变化
  */
 export class Observer {
   value: any;
@@ -67,6 +68,7 @@ export class Observer {
   walk (obj: Object) {
     const keys = Object.keys(obj)
     for (let i = 0; i < keys.length; i++) {
+      // 对data中每个key注册响应式变化
       defineReactive(obj, keys[i], obj[keys[i]])
     }
   }
@@ -110,10 +112,10 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
  * Attempt to create an observer instance for a value,
  * returns the new observer if successfully observed,
  * or the existing observer if the value already has one.
- * 新建一个observer绑定到该属性，如果已经绑定了则直接返回
+ * 新建一个observer绑定到data或data的对象类型key上，如果已经绑定了则直接返回
  */
 export function observe (value: any, asRootData: ?boolean): Observer | void {
-  if (!isObject(value) /* 如果目标不是一个对象，则直接返回 */ || value instanceof VNode) {
+  if (!isObject(value) /* 如果目标不是一个对象（数组也是对象），则直接返回 */ || value instanceof VNode) {
     return
   }
   let ob: Observer | void
@@ -125,8 +127,10 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     !isServerRendering() &&
     (Array.isArray(value) /* 数组类型 */ || isPlainObject(value) /* 对象类型（纯对象） */) &&
     Object.isExtensible(value) &&
-    !value._isVue
+    !value._isVue /* Vue实例不会被observe */
   ) {
+    // data对应一个Observer
+    // 或data里的对象key
     ob = new Observer(value)
   }
   if (asRootData && ob) {
@@ -138,7 +142,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
 /**
  * Define a reactive property on an Object.
  * 注册响应属性，使用Object.defineProperty拦截对象每个属性的获取和修改，
- * 当修改属性值时，通知相应的watcher进行视图的更新等
+ * 当修改响应式的key时，通知相应的watcher进行视图的更新等
  */
 export function defineReactive (
   obj: Object,
@@ -147,6 +151,7 @@ export function defineReactive (
   customSetter?: ?Function,
   shallow?: boolean
 ) {
+  // 每个key对应一个Dep
   const dep = new Dep()
 
   const property = Object.getOwnPropertyDescriptor(obj, key)
@@ -158,7 +163,7 @@ export function defineReactive (
   const getter = property && property.get
   const setter = property && property.set
 
-  let childOb = !shallow && observe(val) // 递归地注册属性的响应性，直到不是对象
+  let childOb = !shallow && observe(val) // 递归地注册每个value的响应性，直到不是value不是对象类型（无法继续递归下去）
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,

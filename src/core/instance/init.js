@@ -14,7 +14,7 @@ let uid = 0
 
 export function initMixin (Vue: Class<Component>) {
   Vue.prototype._init = function (options?: Object) {
-    const vm: Component = this
+    const vm: Component = this // Vue也是一个Component类
     // a uid
     //一个全局自增id
     vm._uid = uid++
@@ -67,6 +67,7 @@ export function initMixin (Vue: Class<Component>) {
     }
 
     if (vm.$options.el) {
+      // 只有在mount后，响应式属性才能相应变化
       vm.$mount(vm.$options.el)
     }
   }

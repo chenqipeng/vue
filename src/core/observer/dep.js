@@ -8,9 +8,15 @@ let uid = 0
 /**
  * A dep is an observable that can have multiple
  * directives subscribing to it.
+ * 
  */
 export default class Dep {
+  /**
+   * 唯一Watcher，静态属性
+   * 任何时候只有一个（target）watcher
+   */
   static target: ?Watcher;
+
   id: number;
   subs: Array<Watcher>;
 
@@ -27,6 +33,9 @@ export default class Dep {
     remove(this.subs, sub)
   }
 
+  /**
+   * 
+   */
   depend () {
     if (Dep.target) {
       Dep.target.addDep(this)
@@ -48,6 +57,12 @@ export default class Dep {
 Dep.target = null
 const targetStack = []
 
+/**
+ * 设置Watcher到dep中的target；
+ * 如果target在之前就存在了，就先将旧target压入栈内；
+ * 因为全局同时只有一个watcher being evaluated
+ * @param {*} _target 
+ */
 export function pushTarget (_target: Watcher) {
   if (Dep.target) targetStack.push(Dep.target)
   Dep.target = _target

@@ -21,6 +21,8 @@ let uid = 0
  * A watcher parses an expression, collects dependencies,
  * and fires callback when the expression value changes.
  * This is used for both the $watch() api and directives.
+ * watcher解析一个值，收集依赖，并且在依赖变化时响应注册的回调函数
+ * 在观察者模式中（订阅/发布），负责注册观察者，并响应变化
  */
 export default class Watcher {
   vm: Component;
@@ -41,14 +43,21 @@ export default class Watcher {
   value: any;
 
   constructor (
+    /**
+     * 要注册观察的component
+     */
     vm: Component,
     expOrFn: string | Function,
     cb: Function,
     options?: ?Object,
+    /**
+     * 是否是根实例的watcher
+     */
     isRenderWatcher?: boolean
   ) {
     this.vm = vm
     if (isRenderWatcher) {
+      // 如果是根实例初始化的watcher，将本watcher设置到根实例的_watcher中
       vm._watcher = this
     }
     vm._watchers.push(this)
@@ -59,6 +68,7 @@ export default class Watcher {
       this.lazy = !!options.lazy
       this.sync = !!options.sync
     } else {
+      // 根实例中的watcher各个更新规则默认false
       this.deep = this.user = this.lazy = this.sync = false
     }
     this.cb = cb
@@ -87,6 +97,8 @@ export default class Watcher {
         )
       }
     }
+    // 根实例的lazy标记默认为false
+    // 所以会执行get
     this.value = this.lazy
       ? undefined
       : this.get()
@@ -157,6 +169,7 @@ export default class Watcher {
   /**
    * Subscriber interface.
    * Will be called when a dependency changes.
+   * 订阅接口
    */
   update () {
     /* istanbul ignore else */

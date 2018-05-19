@@ -145,6 +145,13 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
+/**
+ * 挂载Vue实例到相应的dom对象上
+ * 实例化Watcher，以监听响应更新
+ * @param {*} vm 
+ * @param {*} el 
+ * @param {*} hydrating 
+ */
 export function mountComponent (
   vm: Component,
   el: ?Element,
@@ -201,6 +208,10 @@ export function mountComponent (
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
+  // 设置根实例的_watcher为本watcher，原因是$forceUpdate的调用需要依赖到_watcher
+  // 
+  // Watcher在beforeMount后，mounted前实例化
+  // 所以响应式属性在Watcher实例化后才能被观察且响应更新
   new Watcher(vm, updateComponent, noop, null, true /* isRenderWatcher */)
   hydrating = false
 
